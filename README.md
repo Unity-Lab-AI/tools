@@ -47,43 +47,11 @@ python .claude/tools/screen.py shot               # 2c. look at the actual scree
 
 ## 📦 Install
 
-<table>
-<tr><td width="33%" valign="top">
-
-**Already here?**
-
-```bash
-python doctor.py
-python doctor.py --install
-```
-
-Check, then fix.
-
-</td><td width="33%" valign="top">
-
-**Into a project**
-
-```powershell
-.\install.ps1 -Target C:\code\app
-```
-```bash
-./install.sh ~/code/app
-```
-
-</td><td width="33%" valign="top">
-
-**Machine-wide**
-
-```powershell
-.\install.ps1 -Global
-```
-```bash
-./install.sh --global
-```
-→ `~/.claude/tools`
-
-</td></tr>
-</table>
+| Where | Windows | macOS / Linux |
+|:--|:--|:--|
+| **Already here** — just check & fix deps | `python doctor.py --install` | `python3 doctor.py --install` |
+| **Into a project** | `.\install.ps1 -Target C:\code\app` | `./install.sh ~/code/app` |
+| **Machine-wide** → `~/.claude/tools` | `.\install.ps1 -Global` | `./install.sh --global` |
 
 Add `-NoDeps`/`--no-deps` to skip dependency install, `-Force`/`--force` to overwrite.
 
@@ -95,12 +63,12 @@ works on Windows, macOS & Linux. `screen.py` is Windows-only.
 ## 🧭 Which tool?
 
 ```mermaid
-flowchart TD
-    A([What are you trying to reach?]) --> B{A web page<br/>or an API?}
-    B -->|No — an app, a game,<br/>an installer, Firefox| D[🖥️ screen.py]
-    B -->|Yes| C{Does it need JavaScript,<br/>a login, or clicking?}
-    C -->|No| E[🌐 web.py]
-    C -->|Yes| F[🧭 browser.py]
+flowchart LR
+    A([What are you<br/>trying to reach?]) --> B{Web page<br/>or API?}
+    B -->|an app, a game,<br/>an installer, Firefox| D["🖥️ screen.py"]
+    B -->|yes| C{Needs JS, a login,<br/>or clicking?}
+    C -->|no| E["🌐 web.py"]
+    C -->|yes| F["🧭 browser.py"]
 
     style D fill:#7c3aed,stroke:#5b21b6,color:#fff
     style E fill:#059669,stroke:#047857,color:#fff

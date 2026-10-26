@@ -24,6 +24,7 @@
 Global flags:
     --profile NAME    separate identity/login set (default: "default")
     --port N          CDP port (default 9222, or $CLAUDE_BROWSER_PORT)
+    --window WxH      window size at start (default 1440x900)
 
 The browser stays running between commands, so a login you do once - by hand in
 the visible window, or scripted - holds for every later call. Profiles live in
@@ -107,7 +108,9 @@ def start(headless=False, channel=None, quiet=False):
         return info
     PROFILE_DIR.mkdir(parents=True, exist_ok=True)
     exe = resolve_exe(channel)
+    win = arg_val(ARGS, "--window", os.environ.get("CLAUDE_BROWSER_WINDOW", "1440,900"))
     cmd = [exe, f"--remote-debugging-port={PORT}", f"--user-data-dir={PROFILE_DIR}",
+           f"--window-size={win.replace('x', ',')}",
            "--remote-allow-origins=*", "--no-first-run", "--no-default-browser-check",
            "--disable-session-crashed-bubble", "--restore-last-session=false", "about:blank"]
     if headless:
@@ -223,7 +226,7 @@ def describe(page):
 
 def main():
     a = [x for x in ARGS]
-    for flag in ("--profile", "--port", "--channel"):      # strip global flag+value
+    for flag in ("--profile", "--port", "--channel", "--window"):   # strip global flag+value
         if flag in a:
             i = a.index(flag)
             del a[i:i + 2]
@@ -288,9 +291,14 @@ def main():
             page.wait_for_selector(a[1], timeout=int(arg_val(a, "--timeout", "30000")))
             print(f"present: {a[1]}")
         elif c == "eval":
-            r = page.evaluate(a[1] if a[1].strip().startswith(("(", "()", "function"))
-                              else f"() => ({a[1]})")
-            print(json.dumps(r, indent=2, default=str))
+            js = a[1].strip()
+            if js.startswith(("(", "function", "async", "=>")):
+                expr = js                              # already a function
+            elif ";" in js.rstrip(";") or "\n" in js:
+                expr = "() => { " + js + " }"          # statements: `return` yourself
+            else:
+                expr = f"() => ({js})"                 # a bare expression
+            print(json.dumps(page.evaluate(expr), indent=2, default=str))
         elif c == "links":
             sub = arg_val(a, "--filter")
             rows = page.evaluate(
